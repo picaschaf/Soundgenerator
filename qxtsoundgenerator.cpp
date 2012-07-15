@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <qmath.h>
 
+QxtSoundGenerator* QxtSoundGenerator::generatorHelper = new QxtSoundGenerator();
+
 
 QxtSoundGenerator::QxtSoundGenerator(QObject* parent, int sampleRate, int channelCount, int sampleSize, const QString& codec) :
     QObject(parent)
@@ -41,11 +43,11 @@ QxtSoundGenerator::~QxtSoundGenerator()
 }
 
 /**
-  * Adds a specific tone to the playlist.
+  * \brief Adds a specific tone to the playlist.
   *
-  * @param amplitude The amplitude of this tone from 0.0 to 1.0
-  * @param frequency The tone's frequency in Hz
-  * @param msecs     The tone's duration. Minimum is 50 msecs, every value below that will be set to 50 msecs.
+  * \param amplitude The amplitude of this tone from 0.0 to 1.0
+  * \param frequency The tone's frequency in Hz
+  * \param msecs     The tone's duration. Minimum is 50 msecs, every value below that will be set to 50 msecs.
   */
 void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 msecs)
 {
@@ -77,7 +79,7 @@ void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 
 }
 
 /**
-  * Plays the current sound buffer. Note, this method is asynchronous.
+  * \brief Plays the current sound buffer. Note, this method is asynchronous.
   */
 void QxtSoundGenerator::play()
 {
@@ -85,7 +87,7 @@ void QxtSoundGenerator::play()
 }
 
 /**
-  * Internal, currently unused slot when the sound output's state changes, ie. Idle (stop).
+  * \brief Internal, currently unused slot when the sound output's state changes, ie. Idle (stop).
   */
 void QxtSoundGenerator::playbackFinished()
 {
@@ -95,13 +97,14 @@ void QxtSoundGenerator::playbackFinished()
 }
 
 /**
-  * A static function to simply play a single tone.
+  * \brief A static function to simply play a single tone.
   *
-  * @todo Fix the memory leak
+  * This method runs asynchronous and uses a single soundgenerator, so be careful when
+  * playing sounds without any pause.
   */
 void QxtSoundGenerator::playSound(qreal amplitude, quint16 frequency, quint16 msecs)
 {
-    QxtSoundGenerator* generator = new QxtSoundGenerator();
-    generator->appendSound(amplitude, frequency, msecs);
-    generator->play();
+    QxtSoundGenerator::generatorHelper->clear();
+    QxtSoundGenerator::generatorHelper->appendSound(amplitude, frequency, msecs);
+    QxtSoundGenerator::generatorHelper->play();
 }

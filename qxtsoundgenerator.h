@@ -28,11 +28,18 @@ public:
 
     void appendSound(qreal, quint16, quint16);
 
+    /**
+      * \brief Clears the sound buffer.
+      */
+    void clear() { soundBuffer->clear(); }
+
     void play();
 
     static void playSound(qreal, quint16, quint16);
 
 private:
+    static QxtSoundGenerator* generatorHelper;
+
     QByteArray*   soundBuffer;
     QBuffer*      outputBuffer;
     QAudioFormat* format;
