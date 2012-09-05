@@ -53,26 +53,41 @@ void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 
 {
     msecs = (msecs < 50) ? 50 : msecs;
 
-    QByteArray data(static_cast<int>((msecs / 1000.0f) * format->sampleRate()) * format->channels(), '\0');
-    const    int   channelBytes = format->sampleSize() / 8.0;
-             int   length       = data.size();
-    unsigned char* ptr          = reinterpret_cast<unsigned char*>(data.data());
-             qreal phase        = 0.0;
-    const    qreal d            = 2.0 * M_PI / format->frequency();
-    const    qreal startFreq    = static_cast<qreal>((frequency == 0) ? 0.0 : frequency);
-             qreal phaseStep    = d * startFreq;
+    qreal singleWaveTime = 1.0 / frequency;
+    qreal samplesPerWave = qCeil(format->sampleRate() * singleWaveTime);
+    quint32 waveCount = qCeil(msecs / (singleWaveTime * 1000.0));
+    quint32 sampleSize = static_cast<quint32>(format->sampleSize() / 8.0);
 
-    while (length) {
-        qreal  x     = amplitude * qSin(phase);
-        const qint16 value = x * 32767; // 32767 is the max PCM value
+    QByteArray data(waveCount * samplesPerWave * sampleSize * format->channels(), '\0');
+    unsigned char* dataPointer = reinterpret_cast<unsigned char*>(data.data());
 
-        for (int i = 0; i < format->channels(); i++) {
-            qToLittleEndian<qint16>(value, ptr);
-            ptr += channelBytes;
-            length -= channelBytes;
+    for (quint32 currentWave = 0; currentWave < waveCount; currentWave++) {
+        for (int currentSample = 0; currentSample < samplesPerWave; currentSample++) {
+            double nextRadStep = (currentSample / static_cast<double>(samplesPerWave)) * (2 * M_PI);
+            quint16 sampleValue = static_cast<quint16>((qSin(nextRadStep) + 1.0) * 16383.0);
+
+            for (int channel = 0; channel < format->channels(); channel++) {
+                qToLittleEndian(sampleValue, dataPointer);
+                dataPointer += sampleSize;
+            }
         }
+    }
 
-        phase += phaseStep;
+    soundBuffer->append(data);
+}
+
+/**
+  * \brief Appends a pause with a specific length to the sound buffer.
+  *
+  * \param msecs The duration of the pause.
+  */
+void QxtSoundGenerator::appendPause(quint32 msecs)
+{
+    QByteArray data(format->sampleRate() * (msecs / 1000.0) * format->channels(), '\0');
+    unsigned char* dataPointer = reinterpret_cast<unsigned char*>(data.data());
+    for (int i = 0; i < data.size(); i += 2) {
+        qToLittleEndian(16383, dataPointer);
+        dataPointer += 2;
     }
 
     soundBuffer->append(data);

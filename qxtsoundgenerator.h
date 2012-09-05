@@ -26,7 +26,8 @@ public:
     explicit QxtSoundGenerator(QObject* parent = 0, int sampleRate = 8000, int channelCount = 1, int sampleSize = 16, const QString& codec = "audio/pcm");
     virtual ~QxtSoundGenerator();
 
-    void appendSound(qreal, quint16, quint16);
+    void appendSound(qreal, quint16, quint32);
+    void appendPause(quint32);
 
     /**
       * \brief Clears the sound buffer.
@@ -35,7 +36,7 @@ public:
 
     void play();
 
-    static void playSound(qreal, quint16, quint16);
+    static void playSound(qreal, quint16, quint32);
 
 private:
     static QxtSoundGenerator* generatorHelper;
