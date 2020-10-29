@@ -23,10 +23,10 @@ QxtSoundGenerator::QxtSoundGenerator(QObject* parent, int sampleRate, int channe
     format->setSampleType(QAudioFormat::UnSignedInt);
 
     output = new QAudioOutput(*format, this);
-    connect(output, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playbackFinished()));
+    connect(output, &QAudioOutput::stateChanged, this, &QxtSoundGenerator::playbackFinished);
 
     outputBuffer = new QBuffer(soundBuffer);
-    if (outputBuffer->open(QIODevice::ReadOnly) == false) {
+    if (!outputBuffer->open(QIODevice::ReadOnly)) {
         qCritical() << "Invalid operation while opening QBuffer. audio/pcm";
         return;
     }
