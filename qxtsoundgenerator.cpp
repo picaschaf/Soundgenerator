@@ -10,10 +10,8 @@
 
 QxtSoundGenerator* QxtSoundGenerator::generatorHelper = new QxtSoundGenerator();
 
-
 QxtSoundGenerator::QxtSoundGenerator(QObject* parent, int sampleRate, int channelCount, int sampleSize, const QString& codec) :
-    QObject(parent)
-{
+    QObject(parent) {
     soundBuffer = new QByteArray();
 
     format = new QAudioFormat();
@@ -25,17 +23,16 @@ QxtSoundGenerator::QxtSoundGenerator(QObject* parent, int sampleRate, int channe
     format->setSampleType(QAudioFormat::UnSignedInt);
 
     output = new QAudioOutput(*format, this);
-    connect(output, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playbackFinished()));
+    connect(output, &QAudioOutput::stateChanged, this, &QxtSoundGenerator::playbackFinished);
 
     outputBuffer = new QBuffer(soundBuffer);
-    if (outputBuffer->open(QIODevice::ReadOnly) == false) {
+    if (!outputBuffer->open(QIODevice::ReadOnly)) {
         qCritical() << "Invalid operation while opening QBuffer. audio/pcm";
         return;
     }
 }
 
-QxtSoundGenerator::~QxtSoundGenerator()
-{
+QxtSoundGenerator::~QxtSoundGenerator() {
     delete soundBuffer;
     delete format;
     delete output;
@@ -49,8 +46,7 @@ QxtSoundGenerator::~QxtSoundGenerator()
   * \param frequency The tone's frequency in Hz
   * \param msecs     The tone's duration. Minimum is 50 msecs, every value below that will be set to 50 msecs.
   */
-void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 msecs)
-{
+void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint32 msecs) {
     msecs = (msecs < 50) ? 50 : msecs;
 
     qreal singleWaveTime = 1.0 / frequency;
@@ -58,15 +54,15 @@ void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 
     quint32 waveCount = qCeil(msecs / (singleWaveTime * 1000.0));
     quint32 sampleSize = static_cast<quint32>(format->sampleSize() / 8.0);
 
-    QByteArray data(waveCount * samplesPerWave * sampleSize * format->channels(), '\0');
+    QByteArray data(waveCount * samplesPerWave * sampleSize * format->channelCount(), '\0');
     unsigned char* dataPointer = reinterpret_cast<unsigned char*>(data.data());
 
     for (quint32 currentWave = 0; currentWave < waveCount; currentWave++) {
         for (int currentSample = 0; currentSample < samplesPerWave; currentSample++) {
             double nextRadStep = (currentSample / static_cast<double>(samplesPerWave)) * (2 * M_PI);
-            quint16 sampleValue = static_cast<quint16>((qSin(nextRadStep) + 1.0) * 16383.0);
+            quint16 sampleValue = static_cast<quint16>((qSin(nextRadStep) + 1.0) * amplitude);
 
-            for (int channel = 0; channel < format->channels(); channel++) {
+            for (int channel = 0; channel < format->channelCount(); channel++) {
                 qToLittleEndian(sampleValue, dataPointer);
                 dataPointer += sampleSize;
             }
@@ -81,9 +77,8 @@ void QxtSoundGenerator::appendSound(qreal amplitude, quint16 frequency, quint16 
   *
   * \param msecs The duration of the pause.
   */
-void QxtSoundGenerator::appendPause(quint32 msecs)
-{
-    QByteArray data(format->sampleRate() * (msecs / 1000.0) * format->channels(), '\0');
+void QxtSoundGenerator::appendPause(quint32 msecs) {
+    QByteArray data(format->sampleRate() * (msecs / 1000.0) * format->channelCount(), '\0');
     unsigned char* dataPointer = reinterpret_cast<unsigned char*>(data.data());
     for (int i = 0; i < data.size(); i += 2) {
         qToLittleEndian(16383, dataPointer);
@@ -96,16 +91,14 @@ void QxtSoundGenerator::appendPause(quint32 msecs)
 /**
   * \brief Plays the current sound buffer. Note, this method is asynchronous.
   */
-void QxtSoundGenerator::play()
-{
+void QxtSoundGenerator::play() {
     output->start(outputBuffer);
 }
 
 /**
   * \brief Internal, currently unused slot when the sound output's state changes, ie. Idle (stop).
   */
-void QxtSoundGenerator::playbackFinished()
-{
+void QxtSoundGenerator::playbackFinished() {
     if (output->state() == QAudio::IdleState) {
         //qDebug() << "Playback finished";
     }
@@ -117,8 +110,7 @@ void QxtSoundGenerator::playbackFinished()
   * This method runs asynchronous and uses a single soundgenerator, so be careful when
   * playing sounds without any pause.
   */
-void QxtSoundGenerator::playSound(qreal amplitude, quint16 frequency, quint16 msecs)
-{
+void QxtSoundGenerator::playSound(qreal amplitude, quint16 frequency, quint32 msecs) {
     QxtSoundGenerator::generatorHelper->clear();
     QxtSoundGenerator::generatorHelper->appendSound(amplitude, frequency, msecs);
     QxtSoundGenerator::generatorHelper->play();
