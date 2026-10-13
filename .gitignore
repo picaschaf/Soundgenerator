@@ -66,8 +66,25 @@ Thumbs.db
 # Python byte code
 *.pyc
 
+# CMake
+# -----
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+build/
+cmake-build-*/
+out/
+
 # Binaries
 # --------
 *.dll
 *.exe
+Soundgenerator
 
+
+build-*/

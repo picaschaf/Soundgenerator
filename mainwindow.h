@@ -2,36 +2,38 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtGlobal>
+
+class SoundGenerator;
 
 namespace Ui {
 class MainWindow;
 }
 
-enum DigitalNotes {
-    c = 523,
-    d = 587,
-    e = 659,
-    f = 698,
-    g = 784,
-    a = 880,
-    a_ = 932
+enum class Note : quint16 {
+    C = 523,
+    D = 587,
+    E = 659,
+    F = 698,
+    G = 784,
+    A = 880,
+    ASharp = 932
 };
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    static const int CDurationShort = 400;
-    constexpr static qreal CAmplitude = 16383;
-    const QVector<DigitalNotes> KomischesTetrisMelody{a, e, f, g, f, e, d, d, f, a, g, f, e, e, f, g, a, f, d, d,
-                                                      g, g, a_, d, c, a_, a, f, a, g, f, e, f, g, a, f, d, d};
+    static constexpr int DurationShortMs = 400;
+    static constexpr qreal Amplitude = 0.5;
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-    
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
+
 private:
     Ui::MainWindow *ui;
+    SoundGenerator *generator;
 };
 
 #endif // MAINWINDOW_H
