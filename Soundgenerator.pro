@@ -4,17 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT += core gui multimedia widgets
 
 TARGET = Soundgenerator
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    qxtsoundgenerator.cpp
+           mainwindow.cpp \
+           qxtsoundgenerator.cpp
 
 HEADERS  += mainwindow.h \
-    qxtsoundgenerator.h
+            qxtsoundgenerator.h
 
 FORMS    += mainwindow.ui

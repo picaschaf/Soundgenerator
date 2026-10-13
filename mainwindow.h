@@ -7,25 +7,31 @@ namespace Ui {
 class MainWindow;
 }
 
-typedef union {
-    int i;
-    unsigned short us;
-    short s;
-    char data[4];
-} header;
+enum DigitalNotes {
+    c = 523,
+    d = 587,
+    e = 659,
+    f = 698,
+    g = 784,
+    a = 880,
+    a_ = 932
+};
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
+    static const int CDurationShort = 400;
+    constexpr static qreal CAmplitude = 16383;
+    const QVector<DigitalNotes> KomischesTetrisMelody{a, e, f, g, f, e, d, d, f, a, g, f, e, e, f, g, a, f, d, d,
+                                                      g, g, a_, d, c, a_, a, f, a, g, f, e, f, g, a, f, d, d};
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
 private:
     Ui::MainWindow *ui;
-    QByteArray reverse(const QByteArray&);
-    void printRiffInformation(const QString&);
 };
 
 #endif // MAINWINDOW_H

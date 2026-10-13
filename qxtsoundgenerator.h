@@ -7,7 +7,6 @@ class QAudioFormat;
 class QAudioOutput;
 class QBuffer;
 
-
 /**
   * This class is used to do platform independant simple sound output.
   *
