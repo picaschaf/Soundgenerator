@@ -1,22 +1,34 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QDebug>
+#include "soundgenerator.h"
 
-#include "qxtsoundgenerator.h"
+#include <QVector>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , generator(new SoundGenerator(this))
+{
     ui->setupUi(this);
+    setWindowTitle(tr("Soundgenerator"));
 
-    QxtSoundGenerator* generator = new QxtSoundGenerator();
+    static const QVector<Note> tetrisMelody{
+        Note::A, Note::E, Note::F, Note::G, Note::F, Note::E, Note::D, Note::D,
+        Note::F, Note::A, Note::G, Note::F, Note::E, Note::E, Note::F, Note::G,
+        Note::A, Note::F, Note::D, Note::D, Note::G, Note::G, Note::ASharp, Note::D,
+        Note::C, Note::ASharp, Note::A, Note::F, Note::A, Note::G, Note::F, Note::E,
+        Note::F, Note::G, Note::A, Note::F, Note::D, Note::D
+    };
 
-    for(auto note: KomischesTetrisMelody) {
-        generator->appendSound(CAmplitude, note, CDurationShort);
+    for (Note note : tetrisMelody) {
+        generator->appendSound(Amplitude, static_cast<quint16>(note), DurationShortMs);
     }
 
     generator->play();
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
 }
